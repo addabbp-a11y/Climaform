@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ClimaForm</title>
+  <style>
+    body {
+      background: #0b0b0b;
+      color: #fff;
+      font-family: 'Inter', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .navbar {
+      position: fixed;
+      top: 30px;
+      left: 30px;
+      z-index: 100;
+    }
+    .menu-btn {
+      width: 40px;
+      height: 40px;
+      background: #222;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 32px;
+      color: #fff;
+      border: none;
+      outline: none;
+      transition: background 0.2s;
+    }
+    .menu-btn:active {
+      background: #15f3c5;
+      color: #0b0b0b;
+    }
+    .menu-list {
+      position: absolute;
+      top: 50px;
+      left: 0;
+      background: #222;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px #0008;
+      min-width: 140px;
+      padding: 8px 0;
+      display: none;
+      flex-direction: column;
+      z-index: 101;
+      border: 2px solid #15f3c5;
+    }
+    .menu-list.show {
+      display: flex;
+    }
+    .menu-item {
+      padding: 12px 24px;
+      cursor: pointer;
+      color: #fff;
+      font-size: 1.1em;
+      border: none;
+      background: none;
+      text-align: left;
+      transition: background 0.15s;
+    }
+    .menu-item:hover {
+      background: #15f3c5;
+      color: #111;
+    }
+    header {
+      text-align: center;
+      padding: 2.5rem 0 1.5rem 0;
+    }
+    .center-chair-container {
+      position: relative;
+      height: 39vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+      margin-bottom: 40px;
+    }
+    .center-chair {
+      transition: 
+        transform 0.5s cubic-bezier(.7,.22,.17,1.01), 
+        right 0.5s cubic-bezier(.7,.22,.17,1.01), 
+        bottom 0.5s cubic-bezier(.7,.22,.17,1.01);
+      will-change: transform, right, bottom;
+      position: absolute;
+      left: 50%; top: 0;
+      transform: translate(-50%, 0) scale(1);
+      z-index: 10;
+    }
+    .center-chair img {
+      width: 350px;
+      max-width: 96vw;
+      filter: drop-shadow(0 8px 32px #0ff8);
+      border-radius: 16px;
+      background: rgba(21,243,197,0.04);
+      transition: width 0.3s, filter 0.24s;
+    }
+    .center-chair.shrunk {
+      left: auto;
+      right: 3vw;
+      bottom: 2vw;
+      top: auto;
+      transform: scale(0.32);
+    }
+    .center-chair.shrunk img {
+      filter: drop-shadow(0 4px 16px #15f3c5cc);
+      width: 180px;
+    }
+    section {
+      max-width: 740px;
+      margin: 36px auto 0 auto;
+      padding: 1.5rem;
+      background: #151515;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px #0005;
+      display: none;
+    }
+    section.active {
+      display: block;
+    }
+    .product-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      justify-content: center;
+    }
+    .product-card {
+      background:#111;
+      border-radius:12px;
+      padding:18px;
+      width:260px;
+      text-align:center;
+      box-shadow: 0 2px 10px #1117;
+      margin-bottom: 10px;
+    }
+    .product-card img {
+      width: 150px;
+      margin-bottom: 16px;
+      border-radius: 10px;
+    }
+    .product-card h3 {
+      margin-top: 0;
+    }
+    .product-card ul {
+      text-align:left;
+      font-size:1em;
+      margin:0 auto 1.1em auto;
+      max-width:90%;
+      padding-left: 18px;
+    }
+    .product-card li {
+      margin-bottom: 4px;
+    }
+    .reviews-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-top: 16px;
+    }
+    .review {
+      background: #1a1a1a;
+      border-radius: 9px;
+      padding: 12px 19px 12px 16px;
+      font-size: 1.04em;
+      min-height: 84px;
+      box-shadow: 0 2px 10px #0005;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      border-left: 4px solid #15f3c5;
+      position: relative;
+    }
+    .review-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 1.13em;
+      font-weight: 500;
+      margin-bottom: 0px;
+    }
+    .review-flag {
+      font-size: 1.25em;
+    }
+    .review-name {
+      opacity: 0.98;
+      font-size: 1em;
+      margin-left: 1px;
+      font-weight: bold;
+    }
+    .review-country {
+      opacity: 0.7;
+      font-size: 0.92em;
+      margin-left: 7px;
+      font-style: italic;
+    }
+    .review-stars {
+      color: #FFD700;
+      font-size: 0.85em;
+      margin-left: 0.5em;
+      letter-spacing: -1px;
+      filter: drop-shadow(0 0 1px #FFD700bb);
+      vertical-align: middle;
+      margin-top: 2px;
+      margin-bottom: 0;
+      display: inline-block;
+      line-height: 1;
+    }
+    .review-text {
+      margin-top: 2px;
+      font-size: 1.01em;
+    }
+    footer {
+      text-align: center;
+      margin: 40px 0 15px 0;
+      background: none;
+      border: none;
+    }
+    .reserve-btn {
+      margin-top: 18px;
+      background: linear-gradient(90deg, #15f3c5, #32b2de);
+      color: #111;
+      padding: 14px 40px;
+      border-radius: 32px;
+      font-size: 1.1em;
+      border: none;
+      font-weight: 600;
+      box-shadow: 0 4px 24px #15f3c566;
+      cursor: pointer;
+      outline: none;
+      transition: background 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Language selector */
+    .lang-selector {
+      position: fixed;
+      top: 24px;
+      right: 30px;
+      z-index: 200;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .lang-btn {
+      background: #191f25;
+      border: none;
+      font-size: 2em;
+      cursor: pointer;
+      margin: 0 2px;
+      transition: 
+        transform 0.22s cubic-bezier(.7,.22,.17,1.01), 
+        box-shadow 0.22s,
+        background 0.22s;
+      outline: none;
+      border-radius: 50%;
+      width: 45px; height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 8px #1115;
+      opacity: 0.88;
+      filter: grayscale(0.15) brightness(0.92);
+      border: 2px solid transparent;
+    }
+    .lang-btn.active, .lang-btn:active {
+      box-shadow: 0 2px 14px #15f3c5a4, 0 1px 8px #1115;
+      background: linear-gradient(120deg, #15f3c5 80%, #32b2de 100%);
+      color: #111;
+      transform: scale(1.18);
+      filter: none;
+      opacity: 1;
+      border: 2px solid #0b0b0b;
+    }
+    .lang-btn:hover:not(.active) {
+      background: #232e30;
+      transform: scale(1.09);
+      filter: brightness(1.1);
+    }
+    @media (max-width: 1100px) {
+      .lang-selector { right: 0; }
+    }
+    @media (max-width: 700px) {
+      section { padding: 1rem; }
+      .center-chair img { width: 95vw; }
+      .product-card { width: 95vw; max-width: 320px;}
+      .lang-selector { right: 7px; top: 12px;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Language Selector -->
+  <div class="lang-selector" id="lang-selector">
+    <button class="lang-btn" data-lang="es" title="Español">🇪🇸</button>
+    <button class="lang-btn" data-lang="en" title="English">🇺🇸</button>
+    <button class="lang-btn" data-lang="pt" title="Português">🇧🇷</button>
+    <button class="lang-btn" data-lang="fr" title="Français">🇫🇷</button>
+    <button class="lang-btn" data-lang="de" title="Deutsch">🇩🇪</button>
+    <button class="lang-btn" data-lang="ja" title="日本語">🇯🇵</button>
+    <button class="lang-btn" data-lang="ko" title="한국어">🇰🇷</button>
+    <button class="lang-btn" data-lang="zh" title="中文">🇨🇳</button>
+  </div>
+
+  <!-- Navbar/Menu -->
+  <nav class="navbar">
+    <button class="menu-btn" id="menu-btn" title="Menú">⋮</button>
+    <div class="menu-list" id="menu-list">
+      <div class="menu-item" data-section="inicio">Inicio</div>
+      <div class="menu-item" data-section="productos">Productos</div>
+      <div class="menu-item" data-section="nosotros">Sobre Nosotros</div>
+    </div>
+  </nav>
+
+  <!-- INICIO Section -->
+  <section id="inicio" class="active">
+    <header>
+      <h1 id="main-title" style="font-size:2.5em; margin-bottom:0.2em;">ClimaForm Smart</h1>
+      <h3 id="main-slogan" style="font-weight:400; color:#15f3c5; margin-top:0.2em;">
+        "Engineered for posture. Tuned to temperature."
+      </h3>
+    </header>
+    <div class="center-chair-container">
+      <div class="center-chair" id="center-chair">
+        <img src="climaform-smart.png" alt="ClimaForm Smart" />
+      </div>
+    </div>
+    <h2 id="reviews-title" style="margin-top:2em; text-align:center;">Opiniones de clientes</h2>
+    <div class="reviews-list" id="reviews-list">
+      <!-- JS will fill reviews -->
+    </div>
+    <footer>
+      <p id="footer-contact" style="margin-top:36px; margin-bottom: 0;">Email: climaform@betterlife.com</p>
+      <button class="reserve-btn" id="reserve-btn" onclick="callNow()">Reserva ya</button>
+    </footer>
+  </section>
+
+  <!-- PRODUCTOS Section -->
+  <section id="productos">
+    <h2 id="products-title">Productos</h2>
+    <div class="product-gallery">
+      <!-- GO -->
+      <div class="product-card">
+        <img src="climaform-go.png" alt="ClimaForm Go" />
+        <h3 id="go-title">ClimaForm Go</h3>
+        <ul id="go-desc">
+          <li>Portátil y ergonómica</li>
+        </ul>
+        <div id="go-price" style="font-weight: bold; font-size: 22px; margin: 8px 0;">$100</div>
+      </div>
+      <!-- COMFORT -->
+      <div class="product-card">
+        <img src="climaform-comfort.png" alt="ClimaForm Comfort" />
+        <h3 id="comfort-title">ClimaForm Comfort</h3>
+        <ul id="comfort-desc">
+          <li>Ergonómica y portátil</li>
+          <li>Ajuste de temperatura</li>
+        </ul>
+        <div id="comfort-price" style="font-weight: bold; font-size: 22px; margin: 8px 0;">$250</div>
+      </div>
+      <!-- SMART -->
+      <div class="product-card">
+        <img src="climaform-smart.png" alt="ClimaForm Smart" />
+        <h3 id="smart-title">ClimaForm Smart</h3>
+        <ul id="smart-desc">
+          <li>Ajuste de temperatura</li>
+          <li>Portátil y ergonómica</li>
+          <li>Masajeadora</li>
+          <li>Asistente de inteligencia artificial</li>
+          <li>Batería de larga duración</li>
+        </ul>
+        <div id="smart-price" style="font-weight: bold; font-size: 22px; margin: 8px 0;">$600</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOSOTROS Section -->
+  <section id="nosotros">
+    <h2 id="about-title">Sobre Nosotros</h2>
+    <p id="about-text">
+      ClimaForm es parte de BetterLife, una marca que desde 2011 crea soluciones inteligentes para los desafíos cotidianos. Todo empezó en una clase de inglés con una idea simple… y creció hasta transformar hábitos globales.
+    </p>
+    <p style="color:#15f3c5; margin-top: 2em; font-size:1.1em;" id="about-thanks">¡Gracias por confiar en ClimaForm!</p>
+  </section>
+
+  <script>
+    // Traducciones y banderas/nombres/países en opiniones
+    const translations = {
+      es: {
+        mainTitle: "ClimaForm Smart",
+        mainSlogan: "\"Diseñada para tu postura. Ajustada a la temperatura.\"",
+        reviewsTitle: "Opiniones de clientes",
+        reviews: [
+          { flag: "🇯🇵", name: "Keiko", country: "Japón", text: "La mejor silla que he usado" },
+          { flag: "🇩🇪", name: "Anja", country: "Alemania", text: "¡Revolucionó mi espacio!" },
+          { flag: "🇫🇷", name: "Mathieu", country: "Francia", text: "Perfecta para largas horas" },
+          { flag: "🇧🇷", name: "Lucas", country: "Brasil", text: "La IA es increíble" },
+          { flag: "🇪🇸", name: "María", country: "España", text: "Muy cómoda y fácil de guardar" },
+          { flag: "🇲🇽", name: "Iván", country: "México", text: "La batería dura muchísimo" },
+          { flag: "🇺🇸", name: "Jessica", country: "EEUU", text: "El masaje es muy relajante" },
+          { flag: "🇮🇹", name: "Giulia", country: "Italia", text: "Mejoró mi postura" }
+        ],
+        footerContact: "Email: climaform@betterlife.com",
+        reserveBtn: "Reserva ya",
+        productsTitle: "Productos",
+        goTitle: "ClimaForm Go",
+        goDesc: ["Portátil y ergonómica"],
+        goPrice: "$100",
+        comfortTitle: "ClimaForm Comfort",
+        comfortDesc: ["Ergonómica y portátil", "Ajuste de temperatura"],
+        comfortPrice: "$250",
+        smartTitle: "ClimaForm Smart",
+        smartDesc: [
+          "Ajuste de temperatura",
+          "Portátil y ergonómica",
+          "Masajeadora",
+          "Asistente de inteligencia artificial",
+          "Batería de larga duración"
+        ],
+        smartPrice: "$600",
+        aboutTitle: "Sobre Nosotros",
+        aboutText: "ClimaForm es parte de BetterLife, una marca que desde 2011 crea soluciones inteligentes para los desafíos cotidianos. Todo empezó en una clase de inglés con una idea simple… y creció hasta transformar hábitos globales.",
+        aboutThanks: "¡Gracias por confiar en ClimaForm!",
+        menu: ["Inicio", "Productos", "Sobre Nosotros"]
+      },
+      en: {
+        mainTitle: "ClimaForm Smart",
+        mainSlogan: "\"Engineered for posture. Tuned to temperature.\"",
+        reviewsTitle: "Customer reviews",
+        reviews: [
+          { flag: "🇯🇵", name: "Keiko", country: "Japan", text: "Best chair I've ever used" },
+          { flag: "🇩🇪", name: "Anja", country: "Germany", text: "Revolutionized my workspace!" },
+          { flag: "🇫🇷", name: "Mathieu", country: "France", text: "Perfect for long hours" },
+          { flag: "🇧🇷", name: "Lucas", country: "Brazil", text: "The AI is amazing" },
+          { flag: "🇪🇸", name: "María", country: "Spain", text: "Very comfortable and easy to store" },
+          { flag: "🇲🇽", name: "Iván", country: "Mexico", text: "The battery lasts forever" },
+          { flag: "🇺🇸", name: "Jessica", country: "USA", text: "The massage is very relaxing" },
+          { flag: "🇮🇹", name: "Giulia", country: "Italy", text: "Improved my posture" }
+        ],
+        footerContact: "Email: climaform@betterlife.com",
+        reserveBtn: "Reserve now",
+        productsTitle: "Products",
+        goTitle: "ClimaForm Go",
+        goDesc: ["Portable and ergonomic"],
+        goPrice: "$100",
+        comfortTitle: "ClimaForm Comfort",
+        comfortDesc: ["Ergonomic and portable", "Temperature adjustment"],
+        comfortPrice: "$250",
+        smartTitle: "ClimaForm Smart",
+        smartDesc: [
+          "Temperature adjustment",
+          "Portable and ergonomic",
+          "Massager",
+          "AI assistant",
+          "Long-lasting battery"
+        ],
+        smartPrice: "$600",
+        aboutTitle: "About Us",
+        aboutText: "ClimaForm is part of BetterLife, a brand that since 2011 creates smart solutions for everyday challenges. It all started in an English class with a simple idea… and grew to transform global habits.",
+        aboutThanks: "Thank you for trusting ClimaForm!",
+        menu: ["Home", "Products", "About Us"]
+      },
+      pt: {
+        mainTitle: "ClimaForm Smart",
+        mainSlogan: "\"Projetada para postura. Ajustada para temperatura.\"",
+        reviewsTitle: "Opiniões de clientes",
+        reviews: [
+          { flag: "🇯🇵", name: "Keiko", country: "Japão", text: "A melhor cadeira que já usei" },
+          { flag: "🇩🇪", name: "Anja", country: "Alemanha", text: "Revolucionou meu espaço!" },
+          { flag: "🇫🇷", name: "Mathieu", country: "França", text: "Perfeita para longas horas" },
+          { flag: "🇧🇷", name: "Lucas", country: "Brasil", text: "A IA é incrível" },
+          { flag: "🇪🇸", name: "María", country: "Espanha", text: "Muito confortável e fácil de guardar" },
+          { flag: "🇲🇽", name: "Iván", country: "México", text: "A bateria dura muito" },
+          { flag: "🇺🇸", name: "Jessica", country: "EUA", text: "A massagem é muito relaxante" },
+          { flag: "🇮🇹", name: "Giulia", country: "Itália", text: "Melhorou minha postura" }
+        ],
+        footerContact: "Email: climaform@betterlife.com",
+        reserveBtn: "Reserve agora",
+        productsTitle: "Produtos",
+        goTitle: "ClimaForm Go",
+        goDesc: ["Portátil e ergonômica"],
+        goPrice: "$100",
+        comfortTitle: "ClimaForm Comfort",
+        comfortDesc: ["Ergonômica e portátil", "Ajuste de temperatura"],
+        comfortPrice: "$250",
+        smartTitle: "ClimaForm Smart",
+        smartDesc: [
+          "Ajuste de temperatura",
+          "Portátil e ergonômica",
+          "Massageadora",
+          "Assistente IA",
+          "Bateria de longa duração"
+        ],
+        smartPrice: "$600",
+        aboutTitle: "Sobre nós",
+        aboutText: "ClimaForm faz parte da BetterLife, uma marca que desde 2011 cria soluções inteligentes para desafios do dia a dia. Tudo começou numa aula de inglês com uma ideia simples… e cresceu até transformar hábitos globais.",
+        aboutThanks: "Obrigado por confiar na ClimaForm!",
+        menu: ["Início", "Produtos", "Sobre nós"]
+      },
+      fr: {
+        mainTitle: "ClimaForm Smart",
+        mainSlogan: "\"Conçue pour la posture. Réglée pour la température.\"",
+        reviewsTitle: "Avis des clients",
+        reviews: [
+          { flag: "🇯🇵", name: "Keiko", country: "Japon", text: "La meilleure chaise que j'ai utilisée" },
+          { flag: "🇩🇪", name: "Anja", country: "Allemagne", text: "A révolutionné mon espace !" },
+          { flag: "🇫🇷", name: "Mathieu", country: "France", text: "Parfaite pour de longues heures" },
+          { flag: "🇧🇷", name: "Lucas", country: "Brésil", text: "L'IA est incroyable" },
+          { flag: "🇪🇸", name: "María", country: "Espagne", text: "Très confortable et facile à ranger" },
+          { flag: "🇲🇽", name: "Iván", country: "Mexique", text: "La batterie dure très longtemps" },
+          { flag: "🇺🇸", name: "Jessica", country: "États-Unis", text: "Le massage est très relaxant" },
+          { flag: "🇮🇹", name: "Giulia", country: "Italie", text: "A amélioré ma posture" }
+        ],
+        footerContact: "Email : climaform@betterlife.com",
+        reserveBtn: "Réservez maintenant",
+        productsTitle: "Produits",
+        goTitle: "ClimaForm Go",
+        goDesc: ["Portable et ergonomique"],
+        goPrice: "$100",
+        comfortTitle: "ClimaForm Comfort",
+        comfortDesc: ["Ergonomique et portable", "Réglage de température"],
+        comfortPrice: "$250",
+        smartTitle: "ClimaForm Smart",
+        smartDesc: [
+          "Réglage de température",
+          "Portable et ergonomique",
+          "Masseur",
+          "Assistant IA",
+          "Batterie longue durée"
+        ],
+        smartPrice: "$600",
+        aboutTitle: "À propos",
+        aboutText: "ClimaForm fait partie de BetterLife, une marque qui depuis 2011 crée des solutions intelligentes pour les défis du quotidien. Tout a commencé dans un cours d'anglais avec une idée simple… et a grandi pour transformer les habitudes mondiales.",
+        aboutThanks: "Merci de faire confiance à ClimaForm !",
+        menu: ["Accueil", "Produits", "À propos"]
+      },
+      de: {
+        mainTitle: "ClimaForm Smart",
+        mainSlogan: "\"Entwickelt für Haltung. Abgestimmt auf Temperatur.\"",
+        reviewsTitle: "Kundenmeinungen",
+        reviews: [
+          { flag: "🇯🇵", name: "Keiko", country: "Japan", text: "Der beste Stuhl, den ich je benutzt habe" },
+          { flag: "🇩🇪", name: "Anja", country: "Deutschland", text: "Hat meinen Raum revolutioniert!" },
+          { flag: "🇫🇷", name: "Mathieu", country: "Frankreich", text: "Perfekt für lange Stunden" },
+          { flag: "🇧🇷", name: "Lucas", country: "Brasilien", text: "Die KI ist großartig" },
+          { flag: "🇪🇸", name: "María", country: "Spanien", text: "Sehr bequem und einfach zu verstauen" },
+          { flag: "🇲🇽", name: "Iván", country: "Mexiko", text: "Der Akku hält ewig" },
+          { flag: "🇺🇸", name: "Jessica", country: "USA", text: "Die Massagefunktion ist sehr entspannend" },
+          { flag: "🇮🇹", name: "Giulia", country: "Italien", text: "Verbesserte meine Haltung" }
+        ],
+        footerContact: "Email: climaform@betterlife.com",
+        reserveBtn: "Jetzt reservieren",
+        productsTitle: "Produkte",
+        goTitle: "ClimaForm Go",
+        goDesc: ["Tragbar und ergonomisch"],
+        goPrice: "$100",
+        comfortTitle: "ClimaForm Comfort",
+        comfortDesc: ["Ergonomisch und tragbar", "Temperatureinstellung"],
+        comfortPrice: "$250",
+        smartTitle: "ClimaForm Smart",
+        smartDesc: [
+          "Temperatureinstellung",
+          "Tragbar und ergonomisch",
+          "Massager",
+          "KI-Assistent",
+          "Langlebiger Akku"
+        ],
+        smartPrice: "$600",
+        aboutTitle: "Über uns",
+        aboutText: "ClimaForm ist Teil von BetterLife, einer Marke, die seit 2011 intelligente Lösungen für alltägliche Herausforderungen entwickelt. Alles begann in einem Englischkurs mit einer einfachen Idee … und wuchs zu einer globalen Veränderung heran.",
+        aboutThanks: "Danke für Ihr Vertrauen in ClimaForm!",
+        menu: ["Startseite", "Produkte", "Über uns"]
+      },
+      ja: {
+        mainTitle: "ClimaForm Smart",
+        mainSlogan: "「姿勢のために設計、温度に最適化」",
+        reviewsTitle: "お客様の声",
+        reviews: [
+          { flag: "🇯🇵", name: "けいこ", country: "日本", text: "今までで一番の椅子です" },
+          { flag: "🇩🇪", name: "アンヤ", country: "ドイツ", text: "作業スペースが変わりました！" },
+          { flag: "🇫🇷", name: "マチュー", country: "フランス", text: "長時間座っても快適" },
+          { flag: "🇧🇷", name: "ルーカス", country: "ブラジル", text: "AIが本当にすごいです" },
+          { flag: "🇪🇸", name: "マリア", country: "スペイン", text: "とても快適で収納も簡単" },
+          { flag: "🇲🇽", name: "イバン", country: "メキシコ", text: "バッテリーがとても長持ちします" },
+          { flag: "🇺🇸", name: "ジェシカ", country: "アメリカ", text: "マッサージがとてもリラックスできます" },
+          { flag: "🇮🇹", name: "ジュリア", country: "イタリア", text: "姿勢が改善されました" }
+        ],
+        footerContact: "メール: climaform@betterlife.com",
+        reserveBtn: "今すぐ予約",
+        productsTitle: "製品",
+        goTitle: "ClimaForm Go",
+        goDesc: ["持ち運びやすく、エルゴノミック"],
+        goPrice: "$100",
+        comfortTitle: "ClimaForm Comfort",
+        comfortDesc: ["エルゴノミックかつ携帯性", "温度調整機能"],
+        comfortPrice: "$250",
+        smartTitle: "ClimaForm Smart",
+        smartDesc: [
+          "温度調整機能",
+          "持ち運びやすく、エルゴノミック",
+          "マッサージ機能",
+          "AIアシスタント",
+          "長寿命バッテリー"
+        ],
+        smartPrice: "$600",
+        aboutTitle: "私たちについて",
+        aboutText: "ClimaFormはBetterLifeの一部であり、2011年から日常の課題を解決するスマートな製品を開発しています。英語の授業での小さなアイデアから始まり、今では世界の習慣を変えています。",
+        aboutThanks: "ClimaFormをご利用いただきありがとうございます！",
+        menu: ["ホーム", "製品", "私たちについて"]
+      },
+      ko: {
+        mainTitle: "ClimaForm Smart",
+        mainSlogan: "\"자세를 위해 설계, 온도에 최적화\"",
+        reviewsTitle: "고객 리뷰",
+        reviews: [
+          { flag: "🇯🇵", name: "케이코", country: "일본", text: "지금까지 사용한 의자 중 최고에요" },
+          { flag: "🇩🇪", name: "안야", country: "독일", text: "내 작업 공간을 완전히 바꿨어요!" },
+          { flag: "🇫🇷", name: "마튀", country: "프랑스", text: "장시간 앉아도 완벽해요" },
+          { flag: "🇧🇷", name: "루카스", country: "브라질", text: "AI가 정말 놀라워요" },
+          { flag: "🇪🇸", name: "마리아", country: "스페인", text: "아주 편하고 보관도 쉬워요" },
+          { flag: "🇲🇽", name: "이반", country: "멕시코", text: "배터리가 정말 오래가요" },
+          { flag: "🇺🇸", name: "제시카", country: "미국", text: "마사지가 매우 편안해요" },
+          { flag: "🇮🇹", name: "줄리아", country: "이탈리아", text: "자세가 좋아졌어요" }
+        ],
+        footerContact: "이메일: climaform@betterlife.com",
+        reserveBtn: "지금 예약",
+        productsTitle: "제품",
+        goTitle: "ClimaForm Go",
+        goDesc: ["휴대 가능, 인체공학적"],
+        goPrice: "$100",
+        comfortTitle: "ClimaForm Comfort",
+        comfortDesc: ["인체공학적, 휴대 가능", "온도 조절 기능"],
+        comfortPrice: "$250",
+        smartTitle: "ClimaForm Smart",
+        smartDesc: [
+          "온도 조절 기능",
+          "휴대 가능, 인체공학적",
+          "마사지 기능",
+          "AI 어시스턴트",
+          "긴 배터리 수명"
+        ],
+        smartPrice: "$600",
+        aboutTitle: "회사소개",
+        aboutText: "ClimaForm은 BetterLife의 일부로, 2011년부터 일상 속 문제를 해결하는 스마트한 제품을 만들어왔습니다. 영어 수업에서의 작은 아이디어로 시작해 전 세계의 습관을 바꾸고 있습니다.",
+        aboutThanks: "ClimaForm를 이용해주셔서 감사합니다!",
+        menu: ["홈", "제품", "회사소개"]
+      },
+      zh: {
+        mainTitle: "ClimaForm Smart",
+        mainSlogan: "“为姿势而设计，为温度而优化”",
+        reviewsTitle: "用户评价",
+        reviews: [
+          { flag: "🇯🇵", name: "Keiko", country: "日本", text: "我用过的最好的椅子" },
+          { flag: "🇩🇪", name: "Anja", country: "德国", text: "彻底改变了我的空间！" },
+          { flag: "🇫🇷", name: "Mathieu", country: "法国", text: "长时间使用也很舒适" },
+          { flag: "🇧🇷", name: "Lucas", country: "巴西", text: "人工智能很棒" },
+          { flag: "🇪🇸", name: "María", country: "西班牙", text: "非常舒适且易于收纳" },
+          { flag: "🇲🇽", name: "Iván", country: "墨西哥", text: "电池续航非常久" },
+          { flag: "🇺🇸", name: "Jessica", country: "美国", text: "按摩非常放松" },
+          { flag: "🇮🇹", name: "Giulia", country: "意大利", text: "改善了我的坐姿" }
+        ],
+        footerContact: "邮箱：climaform@betterlife.com",
+        reserveBtn: "立即预订",
+        productsTitle: "产品",
+        goTitle: "ClimaForm Go",
+        goDesc: ["便携且符合人体工学"],
+        goPrice: "$100",
+        comfortTitle: "ClimaForm Comfort",
+        comfortDesc: ["符合人体工学且便携", "温度调节"],
+        comfortPrice: "$250",
+        smartTitle: "ClimaForm Smart",
+        smartDesc: [
+          "温度调节",
+          "便携且符合人体工学",
+          "按摩功能",
+          "AI助手",
+          "长效电池"
+        ],
+        smartPrice: "$600",
+        aboutTitle: "关于我们",
+        aboutText: "ClimaForm隶属于BetterLife，自2011年以来一直致力于为日常挑战提供智能解决方案。最初的灵感来自一次英语课上的一个小想法，现在已影响全球习惯。",
+        aboutThanks: "感谢您信任ClimaForm！",
+        menu: ["首页", "产品", "关于我们"]
+      }
+    };
+
+    let currentLang = "es";
+    function setLang(lang) {
+      currentLang = lang;
+      const t = translations[lang];
+
+      // Inicio
+      document.getElementById('main-title').textContent = t.mainTitle;
+      document.getElementById('main-slogan').textContent = t.mainSlogan;
+      document.getElementById('reviews-title').textContent = t.reviewsTitle;
+      fillReviews(t.reviews);
+
+      // Footer/contact
+      document.getElementById('footer-contact').textContent = t.footerContact;
+      document.getElementById('reserve-btn').textContent = t.reserveBtn;
+
+      // Productos
+      document.getElementById('products-title').textContent = t.productsTitle;
+      document.getElementById('go-title').textContent = t.goTitle;
+      document.getElementById('comfort-title').textContent = t.comfortTitle;
+      document.getElementById('smart-title').textContent = t.smartTitle;
+      document.getElementById('go-price').textContent = t.goPrice;
+      document.getElementById('comfort-price').textContent = t.comfortPrice;
+      document.getElementById('smart-price').textContent = t.smartPrice;
+      setList('go-desc', t.goDesc);
+      setList('comfort-desc', t.comfortDesc);
+      setList('smart-desc', t.smartDesc);
+
+      // Sobre nosotros
+      document.getElementById('about-title').textContent = t.aboutTitle;
+      document.getElementById('about-text').textContent = t.aboutText;
+      document.getElementById('about-thanks').textContent = t.aboutThanks;
+
+      // Menú
+      document.querySelectorAll('.menu-item').forEach((item, i) => {
+        item.textContent = t.menu[i];
+      });
+
+      // Banderita activa
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+    }
+
+    function fillReviews(reviews) {
+      const list = document.getElementById('reviews-list');
+      list.innerHTML = '';
+      reviews.forEach(r => {
+        const reviewDiv = document.createElement('div');
+        reviewDiv.className = "review";
+        reviewDiv.innerHTML = `
+          <div class="review-header">
+            <span class="review-flag">${r.flag}</span>
+            <span class="review-name">${r.name}</span>
+            <span class="review-country">(${r.country})</span>
+            <span class="review-stars">⭐️⭐️⭐️⭐️⭐️</span>
+          </div>
+          <div class="review-text">${r.text}</div>
+        `;
+        list.appendChild(reviewDiv);
+      });
+    }
+    function setList(id, arr) {
+      const ul = document.getElementById(id);
+      ul.innerHTML = "";
+      arr.forEach(txt => {
+        const li = document.createElement("li");
+        li.textContent = txt;
+        ul.appendChild(li);
+      });
+    }
+
+    // SPA navigation
+    const sections = document.querySelectorAll('section');
+    function showSection(id) {
+      sections.forEach(sec => sec.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      closeMenu();
+      window.scrollTo({top:0});
+    }
+
+    // Menu logic
+    const menuBtn = document.getElementById('menu-btn');
+    const menu = document.getElementById('menu-list');
+    menuBtn.addEventListener('click', function(e){
+      menu.classList.toggle('show');
+      e.stopPropagation();
+    });
+    document.querySelectorAll('.menu-item').forEach((item, idx) => {
+      item.addEventListener('click', function(){
+        const sectionIds = ["inicio", "productos", "nosotros"];
+        showSectionWithChair(sectionIds[idx]);
+      });
+    });
+    function closeMenu() { menu.classList.remove('show'); }
+    document.body.addEventListener('click', closeMenu);
+
+    // Language selector
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', function(){
+        setLang(btn.dataset.lang);
+      });
+    });
+
+    // Reserva ya (simula llamada y confetti)
+    function callNow() {
+      launchConfetti();
+      setTimeout(() => window.open('tel:+1234567890'), 800);
+    }
+    // Confetti simple
+    function launchConfetti() {
+      let c = document.createElement('canvas');
+      c.width = window.innerWidth;
+      c.height = window.innerHeight;
+      c.style.position = 'fixed';
+      c.style.left = 0;
+      c.style.top = 0;
+      c.style.pointerEvents = 'none';
+      c.style.zIndex = 9999;
+      document.body.appendChild(c);
+      let ctx = c.getContext('2d');
+      let pieces = Array.from({length: 120}, () => ({
+        x: Math.random() * c.width,
+        y: -20,
+        r: 6 + Math.random() * 8,
+        d: Math.random() * 2 * Math.PI,
+        color: `hsl(${Math.random()*360},80%,60%)`,
+        s: 1 + Math.random()*2,
+        tilt: Math.random()*10
+      }));
+      let frame = 0;
+      function draw() {
+        ctx.clearRect(0, 0, c.width, c.height);
+        pieces.forEach(p => {
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.tilt);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, p.r, p.r/2, 0, 0, 2*Math.PI);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+      function update() {
+        pieces.forEach(p => {
+          p.y += p.s + Math.cos(frame/10 + p.d);
+          p.x += Math.sin(frame/15 + p.d)*2;
+          p.tilt += 0.04;
+        });
+      }
+      function loop() {
+        draw();
+        update();
+        frame++;
+        if (frame < 70) requestAnimationFrame(loop);
+        else c.remove();
+      }
+      loop();
+    }
+
+    // Silla animada en inicio
+    function chairScrollAnim() {
+      const chair = document.getElementById('center-chair');
+      if (!chair) return;
+      const scrollY = window.scrollY;
+      // Solo animar si estamos en el inicio
+      const inicio = document.getElementById('inicio');
+      if (!inicio.classList.contains('active')) {
+        chair.classList.remove('shrunk');
+        return;
+      }
+      // Cuánto scrolleo respecto al contenedor
+      const lim = 180;
+      if(scrollY > lim) {
+        chair.classList.add('shrunk');
+        chair.style.transform = '';
+      } else {
+        chair.classList.remove('shrunk');
+        // Además, lo escalamos según cuánto suba
+        const scale = 1 - Math.min(scrollY/lim*0.68, 0.68);
+        chair.style.transform = `translate(-50%, 0) scale(${scale > 0.32 ? scale : 0.32})`;
+      }
+    }
+    window.addEventListener('scroll', chairScrollAnim);
+
+    function resetChairAnim() {
+      const chair = document.getElementById('center-chair');
+      if (chair) {
+        chair.classList.remove('shrunk');
+        chair.style.transform = 'translate(-50%, 0) scale(1)';
+      }
+    }
+
+    function showSectionWithChair(id) {
+      showSection(id);
+      setTimeout(resetChairAnim, 10);
+    }
+
+    setLang('es');
+    showSection('inicio');
+    resetChairAnim();
+  </script>
+</body>
+</html>
